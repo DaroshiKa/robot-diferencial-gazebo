@@ -1,0 +1,282 @@
+<?xml version="1.0"?>
+<!--
+  Robot móvil de tracción diferencial: chasis + 2 ruedas motrices + 1 caster + LiDAR + cámara.
+  Parametrizado: radio de rueda y separación entre ruedas (los demás valores derivan de ellos
+  o de las dimensiones del chasis). Marco base_link = punto medio del eje de las ruedas
+  (REP-103: x adelante, y izquierda, z arriba).
+-->
+<robot name="robot_diferencial" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- =========================== PARÁMETROS =========================== -->
+  <!-- Cinemática (los usa también el nodo diferencial_control; deben coincidir) -->
+  <xacro:property name="rueda_radio" value="0.05"/>          <!-- r  [m] -->
+  <xacro:property name="separacion_ruedas" value="0.30"/>    <!-- b  [m] distancia entre centros de contacto -->
+  <xacro:property name="rueda_ancho" value="0.04"/>          <!-- [m] -->
+  <xacro:property name="rueda_masa" value="0.15"/>           <!-- [kg] -->
+
+  <!-- Chasis -->
+  <xacro:property name="chasis_largo" value="0.34"/>         <!-- x [m] -->
+  <xacro:property name="chasis_ancho" value="0.20"/>         <!-- y [m] (cabe entre las ruedas: 0.30-0.04 = 0.26) -->
+  <xacro:property name="chasis_alto" value="0.08"/>          <!-- z [m] -->
+  <xacro:property name="chasis_masa" value="2.0"/>           <!-- [kg] -->
+  <xacro:property name="chasis_dx" value="0.03"/>            <!-- desplaza el chasis hacia el caster: CG por delante del eje -->
+  <xacro:property name="chasis_dz" value="0.02"/>            <!-- altura del centro del chasis sobre el eje -->
+
+  <!-- Caster (esfera sin fricción, soporte delantero) -->
+  <xacro:property name="caster_radio" value="0.025"/>
+  <xacro:property name="caster_masa" value="0.05"/>
+  <xacro:property name="caster_x" value="0.17"/>
+  <xacro:property name="caster_z" value="${caster_radio - rueda_radio}"/>  <!-- toca el suelo a la misma cota que las ruedas -->
+
+  <!-- LiDAR (tipo RPLIDAR A1: 360°, 0.15-12 m, 8000 muestras/s) -->
+  <xacro:property name="lidar_radio" value="0.035"/>
+  <xacro:property name="lidar_largo" value="0.041"/>
+  <xacro:property name="lidar_masa" value="0.17"/>
+  <xacro:property name="lidar_x" value="0.0"/>
+  <xacro:property name="lidar_z" value="0.08"/>              <!-- sobre el chasis (z=0.06) y por encima de la camara -->
+  <xacro:property name="lidar_hz" value="10"/>
+  <xacro:property name="lidar_muestras" value="${int(8000 / lidar_hz)}"/>   <!-- 8000 muestras/s / 10 vueltas/s = 800 -->
+
+  <!-- Cámara -->
+  <xacro:property name="camara_x" value="0.21"/>
+  <xacro:property name="camara_z" value="0.04"/>
+  <xacro:property name="camara_masa" value="0.05"/>
+  <xacro:property name="camara_ancho_px" value="640"/>
+  <xacro:property name="camara_alto_px" value="480"/>
+  <xacro:property name="camara_fps" value="30"/>
+  <xacro:property name="camara_hfov" value="1.0472"/>        <!-- 60° [rad] -->
+
+  <!-- Límites del plugin DiffDrive -->
+  <xacro:property name="v_max" value="1.0"/>                 <!-- [m/s]   = 20 rad/s de rueda -->
+  <xacro:property name="w_max" value="3.0"/>                 <!-- [rad/s] -->
+
+  <!-- (pi es una constante predefinida de xacro) -->
+
+  <!-- =========================== INERCIAS =========================== -->
+  <xacro:macro name="inercia_caja" params="m x y z">
+    <inertia ixx="${m*(y*y + z*z)/12.0}" ixy="0" ixz="0"
+             iyy="${m*(x*x + z*z)/12.0}" iyz="0"
+             izz="${m*(x*x + y*y)/12.0}"/>
+  </xacro:macro>
+  <!-- Cilindro con eje a lo largo de z local -->
+  <xacro:macro name="inercia_cilindro_z" params="m r h">
+    <inertia ixx="${m*(3*r*r + h*h)/12.0}" ixy="0" ixz="0"
+             iyy="${m*(3*r*r + h*h)/12.0}" iyz="0"
+             izz="${m*r*r/2.0}"/>
+  </xacro:macro>
+  <xacro:macro name="inercia_esfera" params="m r">
+    <inertia ixx="${2.0*m*r*r/5.0}" ixy="0" ixz="0"
+             iyy="${2.0*m*r*r/5.0}" iyz="0"
+             izz="${2.0*m*r*r/5.0}"/>
+  </xacro:macro>
+
+  <!-- =========================== CHASIS =========================== -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="${chasis_dx} 0 ${chasis_dz}" rpy="0 0 0"/>
+      <geometry><box size="${chasis_largo} ${chasis_ancho} ${chasis_alto}"/></geometry>
+      <material name="azul"><color rgba="0.15 0.35 0.75 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="${chasis_dx} 0 ${chasis_dz}" rpy="0 0 0"/>
+      <geometry><box size="${chasis_largo} ${chasis_ancho} ${chasis_alto}"/></geometry>
+    </collision>
+    <inertial>
+      <origin xyz="${chasis_dx} 0 ${chasis_dz}" rpy="0 0 0"/>
+      <mass value="${chasis_masa}"/>
+      <xacro:inercia_caja m="${chasis_masa}" x="${chasis_largo}" y="${chasis_ancho}" z="${chasis_alto}"/>
+    </inertial>
+  </link>
+
+  <!-- =========================== RUEDAS MOTRICES =========================== -->
+  <!-- Eje de giro = y del link (cilindro girado 90° sobre x). Convención REP-103: giro positivo
+       alrededor de +y hace avanzar el robot hacia +x. -->
+  <xacro:macro name="rueda" params="nombre signo">
+    <link name="rueda_${nombre}">
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <geometry><cylinder radius="${rueda_radio}" length="${rueda_ancho}"/></geometry>
+        <material name="negro"><color rgba="0.08 0.08 0.08 1"/></material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <geometry><cylinder radius="${rueda_radio}" length="${rueda_ancho}"/></geometry>
+      </collision>
+      <inertial>
+        <mass value="${rueda_masa}"/>
+        <!-- cilindro con eje en y: Ixx = Izz = m(3r²+h²)/12 ; Iyy = m r²/2 -->
+        <inertia ixx="${rueda_masa*(3*rueda_radio*rueda_radio + rueda_ancho*rueda_ancho)/12.0}" ixy="0" ixz="0"
+                 iyy="${rueda_masa*rueda_radio*rueda_radio/2.0}" iyz="0"
+                 izz="${rueda_masa*(3*rueda_radio*rueda_radio + rueda_ancho*rueda_ancho)/12.0}"/>
+      </inertial>
+    </link>
+    <joint name="joint_rueda_${nombre}" type="continuous">
+      <parent link="base_link"/>
+      <child link="rueda_${nombre}"/>
+      <origin xyz="0 ${signo*separacion_ruedas/2.0} 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <dynamics damping="0.01" friction="0.0"/>
+    </joint>
+    <gazebo reference="rueda_${nombre}">
+      <mu1>1.0</mu1>
+      <mu2>1.0</mu2>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:rueda nombre="izq" signo="1"/>
+  <xacro:rueda nombre="der" signo="-1"/>
+
+  <!-- =========================== CASTER =========================== -->
+  <link name="caster_link">
+    <visual>
+      <geometry><sphere radius="${caster_radio}"/></geometry>
+      <material name="gris"><color rgba="0.6 0.6 0.6 1"/></material>
+    </visual>
+    <collision>
+      <geometry><sphere radius="${caster_radio}"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="${caster_masa}"/>
+      <xacro:inercia_esfera m="${caster_masa}" r="${caster_radio}"/>
+    </inertial>
+  </link>
+  <joint name="joint_caster" type="fixed">
+    <parent link="base_link"/>
+    <child link="caster_link"/>
+    <origin xyz="${caster_x} 0 ${caster_z}" rpy="0 0 0"/>
+  </joint>
+  <gazebo reference="caster_link">
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+  </gazebo>
+
+  <!-- =========================== LIDAR =========================== -->
+  <link name="lidar_link">
+    <visual>
+      <geometry><cylinder radius="${lidar_radio}" length="${lidar_largo}"/></geometry>
+      <material name="lidar_negro"><color rgba="0.05 0.05 0.05 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="${lidar_radio}" length="${lidar_largo}"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="${lidar_masa}"/>
+      <xacro:inercia_cilindro_z m="${lidar_masa}" r="${lidar_radio}" h="${lidar_largo}"/>
+    </inertial>
+  </link>
+  <joint name="joint_lidar" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="${lidar_x} 0 ${lidar_z}" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="lidar_link">
+    <sensor name="lidar" type="gpu_lidar">
+      <topic>/scan</topic>
+      <gz_frame_id>lidar_link</gz_frame_id>
+      <update_rate>${lidar_hz}</update_rate>
+      <always_on>1</always_on>
+      <visualize>false</visualize>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>${lidar_muestras}</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159265359</min_angle>
+            <max_angle>3.14159265359</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.15</min>
+          <max>12.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <!-- =========================== CÁMARA =========================== -->
+  <link name="camara_link">
+    <visual>
+      <geometry><box size="0.02 0.06 0.03"/></geometry>
+      <material name="camara_negro"><color rgba="0.1 0.1 0.1 1"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="0.02 0.06 0.03"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="${camara_masa}"/>
+      <xacro:inercia_caja m="${camara_masa}" x="0.02" y="0.06" z="0.03"/>
+    </inertial>
+  </link>
+  <joint name="joint_camara" type="fixed">
+    <parent link="base_link"/>
+    <child link="camara_link"/>
+    <origin xyz="${camara_x} 0 ${camara_z}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Marco óptico (REP-103 para cámaras: z hacia adelante, x derecha, y abajo).
+       Los mensajes de imagen/camera_info se publican con este frame. -->
+  <link name="camara_optica_link"/>
+  <joint name="joint_camara_optica" type="fixed">
+    <parent link="camara_link"/>
+    <child link="camara_optica_link"/>
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+  </joint>
+
+  <gazebo reference="camara_link">
+    <sensor name="camara" type="camera">
+      <topic>/camera/image_raw</topic>
+      <gz_frame_id>camara_optica_link</gz_frame_id>
+      <update_rate>${camara_fps}</update_rate>
+      <always_on>1</always_on>
+      <camera>
+        <horizontal_fov>${camara_hfov}</horizontal_fov>
+        <image>
+          <width>${camara_ancho_px}</width>
+          <height>${camara_alto_px}</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>15.0</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
+
+  <!-- =========================== PLUGINS DE GAZEBO =========================== -->
+  <gazebo>
+    <!-- Tracción diferencial: parámetros = los del modelo (r y b del xacro) -->
+    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+      <left_joint>joint_rueda_izq</left_joint>
+      <right_joint>joint_rueda_der</right_joint>
+      <wheel_separation>${separacion_ruedas}</wheel_separation>
+      <wheel_radius>${rueda_radio}</wheel_radius>
+      <topic>/cmd_vel</topic>
+      <odom_topic>/odom</odom_topic>
+      <tf_topic>/tf</tf_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_link</child_frame_id>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <max_linear_velocity>${v_max}</max_linear_velocity>
+      <min_linear_velocity>${-v_max}</min_linear_velocity>
+      <max_angular_velocity>${w_max}</max_angular_velocity>
+      <min_angular_velocity>${-w_max}</min_angular_velocity>
+      <max_linear_acceleration>2.0</max_linear_acceleration>
+      <min_linear_acceleration>-2.0</min_linear_acceleration>
+      <max_angular_acceleration>6.0</max_angular_acceleration>
+      <min_angular_acceleration>-6.0</min_angular_acceleration>
+    </plugin>
+
+    <!-- Publica las posiciones/velocidades de las articulaciones (w de las ruedas) -->
+    <plugin filename="gz-sim-joint-state-publisher-system"
+            name="gz::sim::systems::JointStatePublisher"/>
+  </gazebo>
+
+</robot>
