@@ -1,8 +1,7 @@
 # Robot diferencial en Gazebo — pista propia, LiDAR y cámara
 
-Reporte de Robótica (Universidad EIA). Robot móvil de **tracción diferencial** (2 ruedas motrices + caster)
-simulado en **ROS 2 Jazzy + Gazebo Harmonic**, con LiDAR 2D y cámara, que recorre una pista diseñada por
-el equipo con `teleop_twist_keyboard`.
+Robot móvil de **tracción diferencial** (2 ruedas motrices + caster)
+simulado en **ROS 2 Jazzy + Gazebo Harmonic**, con LiDAR 2D y cámara
 
 - **Autores:** Jaime Landinez, Juan David Botero
 
