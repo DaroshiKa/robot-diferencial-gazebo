@@ -4,9 +4,8 @@ Reporte de Robótica (Universidad EIA). Robot móvil de **tracción diferencial*
 simulado en **ROS 2 Jazzy + Gazebo Harmonic**, con LiDAR 2D y cámara, que recorre una pista diseñada por
 el equipo con `teleop_twist_keyboard`.
 
-- **Autores:** Jaime Landinez (jaime.landinez@eia.edu.co) · `[COMPLETAR integrantes]`
-- **Grupo / entrega:** `[COMPLETAR GXX_PI_AVYY]`
-- **Notion (modelo, cinemática, parámetros y decisiones):** `[COMPLETAR enlace]` — texto base en [`docs/NOTION_contenido.md`](docs/NOTION_contenido.md)
+- **Autores:** Jaime Landinez, Juan David Boter
+
 
 ![Pista](src/robot_diferencial/docs/pista_preview.png)
 
@@ -144,9 +143,3 @@ y la lógica del nodo con ROS simulado.
 **Pendiente de comprobar en una máquina con ROS 2 Jazzy + Gazebo Harmonic:** `colcon build`, el arranque con `ros2 launch`, los nombres reales de topics del bridge
 (sobre todo `/camera/camera_info`; el launch puentea los dos nombres posibles), el recorrido completo con teclado y el error medido entre odometrías.
 
-## Referencias
-
-- Siegwart, Nourbakhsh y Scaramuzza. *Introduction to Autonomous Mobile Robots*, 2.ª ed., MIT Press, 2011 — cap. 3 (cinemática de robots de ruedas).
-- REP-103 (unidades y convenciones de ejes) y REP-105 (marcos de coordenadas), ROS Enhancement Proposals.
-- Documentación de Gazebo Sim (sistemas `DiffDrive`, `JointStatePublisher`, sensores `gpu_lidar` y `camera`) y de `ros_gz_bridge`.
-- SLAMTEC, hoja de datos RPLIDAR A1.
