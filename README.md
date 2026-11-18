@@ -4,7 +4,7 @@ Reporte de Robótica (Universidad EIA). Robot móvil de **tracción diferencial*
 simulado en **ROS 2 Jazzy + Gazebo Harmonic**, con LiDAR 2D y cámara, que recorre una pista diseñada por
 el equipo con `teleop_twist_keyboard`.
 
-- **Autores:** Jaime Landinez, Juan David Boter
+- **Autores:** Jaime Landinez, Juan David Botero
 
 
 ![Pista](src/robot_diferencial/docs/pista_preview.png)
@@ -134,12 +134,3 @@ Diseño a partir del trazado de referencia (`docs/pista_referencia.png`): se bin
 - Verificaciones del generador: radio mínimo > semiancho, separación entre tramos vecinos, huella del robot (0.42 × 0.34 m) a lo largo del eje con ≥ 22 cm de holgura, y paso libre de cada obstáculo.
 
 Para modificar: edite los parámetros al inicio de `tools/generar_pista.py` y ejecute `python3 tools/generar_pista.py` (desde `src/robot_diferencial`).
-
-## Estado de verificación
-
-Hecho sin simulador (este entorno no tenía ROS ni Gazebo): XML bien formado y expansión de los macros xacro con un expansor propio
-(árbol de links conexo, inercias físicamente válidas, sin expresiones sin evaluar), geometría de la pista, matemática de la cinemática (6 pruebas)
-y la lógica del nodo con ROS simulado.
-**Pendiente de comprobar en una máquina con ROS 2 Jazzy + Gazebo Harmonic:** `colcon build`, el arranque con `ros2 launch`, los nombres reales de topics del bridge
-(sobre todo `/camera/camera_info`; el launch puentea los dos nombres posibles), el recorrido completo con teclado y el error medido entre odometrías.
-
