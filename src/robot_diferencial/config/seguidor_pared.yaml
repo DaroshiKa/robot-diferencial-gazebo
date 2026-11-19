@@ -1,0 +1,21 @@
+# Parámetros del seguimiento de pared (nodo seguidor_pared). Justificación en el README.
+seguidor_pared:
+  ros__parameters:
+    lado: izquierda            # muro interior en la pista antihoraria
+    theta_deg: 45.0            # ángulo entre los rayos a y b
+    d_nom: 0.40                # m: = ancho nominal/2 -> D_des = min(0.40, W/2): centrado en 0.80 m y en 0.40 m
+    l_anticipacion: 0.45       # m: distancia de anticipación l (amortiguamiento, ver modelo)
+    kp: 10.0                   # rad/s por m
+    ki: 0.3                    # rad/s por m·s (sesgos: deslizamiento skid-steer, desalineación)
+    kd: 0.3                    # rad/s por m/s (derivada filtrada, tau_d = 0.1 s)
+    tau_d: 0.1
+    i_max: 0.3
+    v_max: 1.0                 # m/s (límite del robot)
+    v_min: 0.15
+    w_max: 4.0                 # rad/s (límite del robot)
+    a_lat: 1.2                 # m/s²: v <= a_lat/|omega| (más lento en curvas)
+    a_frenado: 1.2             # m/s²: v <= sqrt(2 a (d_frente - d_seguridad))
+    d_seguridad: 0.30
+    cono_frente_deg: 12.0
+    ventana: 2                 # mediana de 5 rayos alrededor de a y b
+    usar_ancho_adelante: true  # W medido con D_t+1 de ambos lados (anticipa el estrechamiento)

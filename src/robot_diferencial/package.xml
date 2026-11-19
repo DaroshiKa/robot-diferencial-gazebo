@@ -2,8 +2,8 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>robot_diferencial</name>
-  <version>1.0.0</version>
-  <description>Robot diferencial (2 ruedas + caster) con LiDAR y cámara en Gazebo Harmonic, pista propia</description>
+  <version>2.0.0</version>
+  <description>Robot MicroROS (skid-steer 4 ruedas) con LiDAR MS200 y cámara en Gazebo Harmonic; pista propia (STL) y launch teleop/auto</description>
   <maintainer email="jaime.landinez@eia.edu.co">Jaime Landinez</maintainer>
   <license>Apache-2.0</license>
 
@@ -16,6 +16,8 @@
   <exec_depend>rviz2</exec_depend>
   <exec_depend>diferencial_control</exec_depend>
   <exec_depend>teleop_twist_keyboard</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>xterm</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

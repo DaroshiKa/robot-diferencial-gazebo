@@ -1,0 +1,8 @@
+Vía efectiva (calibrada con la vuelta 1, mínimos cuadrados de omega): chi = omega_ruedas/omega_real = 1.459 -> b_ef = chi·b = 0.1955 m (b geométrica = 0.134 m)
+
+ vuelta | tiempo [s] | cierre cinemática b   | cierre DiffDrive      | cierre con b_ef
+        |            |  [cm]      [°]        |  [cm]      [°]        |  [cm]      [°]
+      1 |      31.50 |   387.2    159.9      |   387.4    159.9      |    32.5     -4.0
+      2 |      31.62 |   138.7    -42.3      |   139.1    -42.3      |   131.4    -16.5
+      3 |      31.59 |   358.3    118.2      |   359.2    118.3      |   149.4    -21.5
+ TOTAL  |      94.71 |

@@ -2,8 +2,8 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>diferencial_control</name>
-  <version>1.0.0</version>
-  <description>Cinemática de las llantas del robot diferencial y comparación con el /odom de Gazebo</description>
+  <version>2.0.0</version>
+  <description>Cinemática (skid-steer), AEB por TTC, seguimiento de pared (PID), mux de comandos y cronómetro de vueltas</description>
   <maintainer email="jaime.landinez@eia.edu.co">Jaime Landinez</maintainer>
   <license>Apache-2.0</license>
 
@@ -11,6 +11,10 @@
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>rcl_interfaces</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-matplotlib</exec_depend>
 
   <test_depend>python3-pytest</test_depend>
 

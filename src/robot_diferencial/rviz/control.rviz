@@ -101,48 +101,91 @@ Visualization Manager:
       Value: true
       Visibility: {}
       Zoom Factor: 1
-    - Class: rviz_default_plugins/Odometry
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 255; 255; 255
       Enabled: true
-      Keep: 200
-      Name: Odometry Gazebo DiffDrive (/odom)
-      Position Tolerance: 0.1
-      Angle Tolerance: 0.1
-      Shape:
-        Alpha: 1
-        Axes Length: 0.2
-        Axes Radius: 0.02
-        Color: 0; 200; 0
-        Value: Arrow
+      Head Diameter: 0.3
+      Head Length: 0.2
+      Length: 0.3
+      Line Style: Billboards
+      Line Width: 0.03
+      Name: Trayectoria REAL (/ruta/real)
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0.01
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.03
+      Shaft Diameter: 0.1
+      Shaft Length: 0.1
       Topic:
-        Depth: 5
+        Depth: 1
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /odom
+        Value: /ruta/real
       Value: true
-    - Class: rviz_default_plugins/Odometry
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 255; 60; 60
       Enabled: true
-      Keep: 200
-      Name: Odometria propia (/odom_cinematica)
-      Position Tolerance: 0.1
-      Angle Tolerance: 0.1
-      Shape:
-        Alpha: 1
-        Axes Length: 0.2
-        Axes Radius: 0.02
-        Color: 255; 0; 0
-        Value: Arrow
+      Head Diameter: 0.3
+      Head Length: 0.2
+      Length: 0.3
+      Line Style: Billboards
+      Line Width: 0.02
+      Name: Odometria cinematica (/ruta/estimada)
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0.01
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.03
+      Shaft Diameter: 0.1
+      Shaft Length: 0.1
       Topic:
-        Depth: 5
+        Depth: 1
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /odom_cinematica
+        Value: /ruta/estimada
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 60; 140; 255
+      Enabled: true
+      Head Diameter: 0.3
+      Head Length: 0.2
+      Length: 0.3
+      Line Style: Billboards
+      Line Width: 0.02
+      Name: Odometria DiffDrive (/ruta/diffdrive)
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0.01
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.03
+      Shaft Diameter: 0.1
+      Shaft Length: 0.1
+      Topic:
+        Depth: 1
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /ruta/diffdrive
       Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: odom
+    Fixed Frame: world
     Frame Rate: 30
   Name: root
   Tools:
@@ -162,13 +205,13 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 6
+      Distance: 16
       Focal Point:
-        X: 0
-        Y: 0
+        X: 2
+        Y: 2.5
         Z: 0
-      Pitch: 0.9
-      Yaw: 0.0
+      Pitch: 1.2
+      Yaw: -1.5708
       Name: Current View
-      Target Frame: base_link
+      Target Frame: world
     Saved: ~
