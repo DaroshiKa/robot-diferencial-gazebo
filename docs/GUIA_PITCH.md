@@ -84,3 +84,8 @@ del error de odometría**. Detalle y fuentes en el README.
 - ¿Cómo se mide el tiempo? Con la pose real y `/clock`: del primer cruce de x = 0 (hacia +x, |y| < 0.6) al cruce n.º 4.
 - ¿Qué pasa si el world del profesor no tiene el sistema Sensors? El launch genera una copia con los sistemas que falten.
 - ¿Usa mapa o waypoints? No: cada comando depende solo del barrido actual (ni siquiera de la odometría).
+- ¿A qué frecuencia llegan las velocidades de las ruedas? `/joint_states` a 100 Hz (`<update_rate>` del plugin). Por
+  defecto Gazebo lo publica en cada paso de física (1000 Hz) y eso, junto con `/clock`, saturaba los nodos: el AEB llegó
+  a quedarse >1 s sin LiDAR. A 4 rad/s el rumbo cambia 0.04 rad entre muestras: 100 Hz sobra para integrar.
+- ¿Probaron en la pista oficial? Sí, con el world y el STL entregados: 112.54 s en 3 vueltas, 0 frenados, holgura mín.
+  8.3 cm; caja en la recta → se detiene a ~26 cm.

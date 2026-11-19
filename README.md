@@ -15,10 +15,13 @@ por tiempo a la colisión** siempre activo, odometría en varias vueltas y una p
 |---|---|---|---|---|---|---|---|
 | Propia (29.97 m) | 31.50 s | 31.62 s | 31.59 s | **94.71 s** | 0 | 0 | 8.4 cm |
 | Réplica de la de competencia (37.2 m) | 37.47 s | 37.50 s | 37.49 s | **112.46 s** | 0 | 0 | 8.0 cm |
+| **Pista del profesor** (`pista_competencia.sdf` + STL entregados, con GUI y RViz) | 37.54 s | 37.47 s | 37.53 s | **112.54 s** | 0 | 0 | 8.3 cm |
 
 Prueba del AEB con una caja de 0.20 m en la recta principal (x = 4 m) a 1 m/s: frena a TTC = 0.50 s
 (umbral 0.52 s), **se detiene a ~27 cm de la caja y se queda quieto** mientras la caja esté ahí; al retirarla
 sigue solo. En teleoperación, dirigido a 1 m/s contra el muro de la curva S2, se detiene a ~0.3 m del muro.
+Las dos pruebas se repitieron en la pista del profesor: caja en x = 6 m → frena con TTC = 0.50 s y queda a ~26 cm;
+teleoperado recto a 1 m/s → se detiene a 9–16 cm del muro exterior de S2, sin tocarlo.
 Figuras en [`src/robot_diferencial/docs/resultados/`](src/robot_diferencial/docs/resultados).
 
 ## Contenido
@@ -42,7 +45,8 @@ colcon build --symlink-install
 source install/setup.bash
 ```
 
-`xterm` es para que el launch abra el teclado de teleoperación en su propia ventana (también sirve `gnome-terminal`).
+`xterm` es para que el launch abra el teclado de teleoperación en su propia ventana. Si no está instalado usa
+`gnome-terminal` (Ubuntu lo trae) o `konsole`; si no hay ninguno, el launch imprime el comando para abrirlo a mano.
 
 ```bash
 # Teleoperado en la pista propia (abre una ventana con teleop_twist_keyboard)
@@ -77,6 +81,9 @@ autónomo, el robot se detiene.
 ### Día de la competencia
 
 1. Copiar el paquete `pista_competencia` del profesor dentro de `src/` y compilar (`colcon build --symlink-install`).
+   Si solo se tienen los dos archivos sueltos (el `.stl` y el world `.sdf`), el paquete se arma con
+   `bash src/robot_diferencial/tools/crear_paquete_pista_competencia.sh <pista.stl> <pista.sdf>` (desde la raíz del
+   workspace); el world usa `model://pista_competencia` y Gazebo necesita la carpeta del modelo.
    El launch lo encuentra solo (`worlds/*.sdf` o `*.world`) y agrega sus carpetas a `GZ_SIM_RESOURCE_PATH`.
    Si no está compilado, usa la **réplica de pruebas** y lo avisa; también se puede dar `mundo:=<ruta>`.
 2. Si el world del profesor no declara el sistema `Sensors` (necesario para el LiDAR `gpu_lidar`), el launch escribe
@@ -245,6 +252,12 @@ Además, corridas completas en Gazebo Harmonic (resultados arriba), incluida una
 `pista_competencia` de imitación cuyo world no declara plugins.
 
 ## Cambios y correcciones respecto al reporte anterior
+
+- `/joint_states` se publicaba en **cada paso de física (1000 Hz)**. Sumado a `/clock` (otros 1000 Hz), cargaba el
+  bridge y los nodos de Python; en una máquina con el disco o la CPU ocupados, el AEB y el seguidor llegaron a
+  quedarse >1 s sin `/scan` y el robot chocó a 1 m/s. Ahora `JointStatePublisher` tiene `<update_rate>100</update_rate>`:
+  sobra para la odometría (a 4 rad/s el rumbo cambia 0.04 rad entre muestras; integración por punto medio) y los
+  errores de cierre no cambiaron.
 
 - `/joint_states` dependía del nombre del world (`/world/pista/...`): en la pista del profesor la cinemática se
   habría quedado sin datos. Ahora el plugin publica en `/joint_states` directamente.

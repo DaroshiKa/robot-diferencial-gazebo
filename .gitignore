@@ -5,3 +5,6 @@ __pycache__/
 *.pyc
 *.egg-info/
 .pytest_cache/
+
+# Paquete de la pista del profesor (se arma con tools/crear_paquete_pista_competencia.sh)
+src/pista_competencia/
